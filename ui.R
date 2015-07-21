@@ -57,8 +57,31 @@ fluidPage(tabsetPanel(
                tableOutput("topTable")
              )
            )
-  )
-  
-
+    ),
+  tabPanel("Single gene trends",
+           pageWithSidebar(
+             headerPanel("S.habrochaites differential gene expression"),
+             
+             sidebarPanel(
+                 textInput("userGene", label="Enter gene name (e.g., Solyc05g053410.1.1, c37227_g1_i1)", value="Solyc00g005000.2.1"),
+                 actionButton("singleGeneButton", "Get gene expression plot")
+             ),
+             
+             mainPanel(
+               tableOutput("errorText"), 
+               plotOutput("singleGenePlot")
+               )
+           )
+  ),
+   tabPanel("Get a sequence",
+            pageWithSidebar(
+              headerPanel("S.habrochaites differential gene expression"),
+              sidebarPanel(
+                textInput("userGeneSeq", label="Enter name (only 'c' genes)", value="c37227_g1_i1"),
+                actionButton("singleSeqButton", "Get sequence of transcribed fragment")
+              ),
+              mainPanel( h1("Coming soon!") )
+            )
+ )
 ) #end Tabset Panel
 ) #end fluid page

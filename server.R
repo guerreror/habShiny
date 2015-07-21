@@ -2,9 +2,7 @@
 # This is the server logic for a Shiny web application.
 #
 ## To deploy, use:
-#library(shinyapps)
-#shinyapps::setAccountInfo(name='hawkmoth', ...
-#shinyapps::deployApp('~/Box Sync/habDX/shinyHab/', appName ="habDX")
+#shinyapps::deployApp('~/Box Sync/habDX/habShiny/', appName ="habDX")
 
 library(shiny)
 library(dplyr)
@@ -68,8 +66,33 @@ shinyServer(function(input, output) {
   
   output$downloadGeneTable <- downloadHandler(filename =
                                                 function() {paste('Hab_genes_', Sys.Date(), '.txt', sep='')}, 
-                                              content = function(file) {write.table(geneTable(), file, row.names=F)}
-  )
+                                              content = 
+                                                function(file) {write.table(geneTable(), file, row.names=F)})
   
+  ####### Second tab
+  normExp <- read.table("hab_flatNormalExpr.txt", header=T)
+  treat <- read.table("hab_metadata.txt", header=T)
+
+  observeEvent(eventExpr = input$singleGeneButton,
+               label = "checkGene",
+               handlerExpr ={
+                 idx = match(input$userGene, row.names(normExp))
+                 if(is.na(idx)){ val$buttonSwitch <- NaN
+                                 val$errorMsg <- data.frame(Gene = input$userGene, 
+                                                            Expressed ="No", 
+                                                            Recognized_as_gene = !is.na(match(input$userGene, geneNames$Name)) )
+                 } else { val$buttonSwitch <- 1
+                          val$single <- mutate(treat, Acc=as.factor(Acc), expr=unlist(normExp[idx,]) )}
+               })
   
+  output$errorText <- renderTable({
+    if(is.null(val$single)) return()
+    if(is.na(val$buttonSwitch)) return(val$errorMsg)
+  })
+  
+  output$singleGenePlot <- renderPlot({
+    if(is.null(val$single)) return()
+    if(is.na(val$buttonSwitch)) return()
+    ggplot(val$single,aes(x=Tissue, y = expr, color=Acc ))+ scale_colour_discrete() + geom_point(size=3)
+  })
 }) #end shinyServer fn
