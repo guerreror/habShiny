@@ -53,35 +53,82 @@ fluidPage(tabsetPanel(
              mainPanel(
                plotOutput("histPlot"),
                h3(textOutput("selectedNumber")),
-               p("Here is the Top-20 (sorted by log2[fold change]):"),
+               p("Here is the Top-20:"),
+               selectInput("sortBy", "Sort by ", list("Fold change" ="logFC", "Average expression"="AvgExpr")),
                tableOutput("topTable")
              )
            )
     ),
+  
   tabPanel("Single gene trends",
-           pageWithSidebar(
+           fluidPage(
              headerPanel("S.habrochaites differential gene expression"),
              
-             sidebarPanel(
-                 textInput("userGene", label="Enter gene name (e.g., Solyc05g053410.1.1, c37227_g1_i1)", value="Solyc00g005000.2.1"),
-                 actionButton("singleGeneButton", "Get gene expression plot")
-             ),
-             
-             mainPanel(
-               tableOutput("errorText"), 
-               plotOutput("singleGenePlot")
+             fluidRow(
+               column(width=4,
+                      wellPanel(
+                 textInput("userGene", label="Enter gene name", value="Solyc01g080970"),
+                 actionButton("singleGeneButton", "Get gene expression plots")
+                 )
+               ),
+               column(  width=7,
+                 h3("Gene stats"),
+                 p("From contrast selected in first tab. ", em("Rank") ," is the number of genes with logFC < focal gene,",em("percentile"),"is the fraction."),
+                 tableOutput("singleRank")                 
+                 )
+                 ),
+             fluidRow( 
+               column(width=10,offset=1,
+               tableOutput("errorText"),
+               h3("Results across all samples"),
+               plotOutput("singleGenePlot"),
+               br(),
+               h3("Pairwise comparisons"),
+               br(),
+               h4("Pollen-side IP plot:"),
+               plotOutput("singleGene_poIP"),
+               br(),
+               h4("Style-side IP plot:"),
+               plotOutput("singleGene_stIP"),
+               br(),
+               h4("Style-side UI plot:"),
+               plotOutput("singleGene_UI")
+               )
                )
            )
   ),
-   tabPanel("Get a sequence",
+  
+  tabPanel("Get a sequence",
             pageWithSidebar(
               headerPanel("S.habrochaites differential gene expression"),
               sidebarPanel(
-                textInput("userGeneSeq", label="Enter name (only 'c' genes)", value="c37227_g1_i1"),
-                actionButton("singleSeqButton", "Get sequence of transcribed fragment")
+                textInput("userSeq", label="Enter name (only 'c' genes)", value="c37227_g1_i1"),
+                actionButton("singleSeqButton", "Get transcribed fragment sequence")
               ),
-              mainPanel( h1("Coming soon!") )
+              mainPanel( 
+                tableOutput("errorSeqChk"), 
+                verbatimTextOutput("text.Seq")
+                )
             )
+ ),
+ 
+ tabPanel("Search",
+          fluidPage(
+           headerPanel("S.habrochaites differential gene expression"),
+           fluidRow(
+             column(width=12,
+             wellPanel(
+             textInput("userSearch", label="Search in database:", value=""),
+             checkboxInput("searchSelected", label="Include only genes selected in first tab", value=T ),
+             actionButton("searchButton", "Go")
+             )
+             )
+           ),
+           fluidRow(
+             tableOutput("searchResults")
+             )
+          )
  )
+ 
 ) #end Tabset Panel
 ) #end fluid page
